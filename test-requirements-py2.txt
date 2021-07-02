@@ -236,7 +236,7 @@ wcwidth==0.2.5 \
     --hash=sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784 \
     --hash=sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83 \
     # via pytest
-zipp==1.2.0 \
-    --hash=sha256:c70410551488251b0fee67b460fb9a536af8d6f9f008ad10ac51f615b6a521b1 \
-    --hash=sha256:e0d9e63797e483a30d27e09fffd308c59a700d365ec34e93cc100844168bf921 \
+zipp==3.4.2 \
+    --hash=sha256:a5303f8ad20aff64720bf548256646f74fc8c167065c0d177a98a7cadceed85a \
+    --hash=sha256:ce85de43ee0ead77dd0fbee3902bec1501aef59b92a2e18265396b22a1d756ab \
     # via importlib-metadata
