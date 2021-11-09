@@ -137,10 +137,9 @@ more-executors==2.5.1 \
     --hash=sha256:1127fe5a8aafb92175f75c014b00a93c18aeb5e96e658617e0267372ea20773f \
     --hash=sha256:fa55e9ad51ae885139a8d09c4eb7be209bd1136dc31ae7cbf2b76e117bd3c038 \
     # via -r ./test-requirements-py2.in, pushcollector
-more-itertools==5.0.0 \
-    --hash=sha256:38a936c0a6d98a38bcc2d03fdaaedaba9f412879461dd2ceff8d37564d6522e4 \
-    --hash=sha256:c0a5785b1109a6bd7fac76d6837fd1feca158e54e521ccd2ae8bfe393cc9d4fc \
-    --hash=sha256:fe7a7cae1ccb57d33952113ff4fa1bc5f879963600ed74918f1236e212ee50b9 \
+more-itertools==8.11.0 \
+    --hash=sha256:88afff98d83d08fe5e4049b81e2b54c06ebb6b3871a600040865c7a592061cbb \
+    --hash=sha256:0a2fd25d343c08d7e7212071820e7e7ea2f41d8fb45d6bc8a00cd6ce3b7aab88 \
     # via pytest
 packaging==20.4 \
     --hash=sha256:4357f74f47b9c12db93624a82154e9b120fa8293699949152b22065d556079f8 \
