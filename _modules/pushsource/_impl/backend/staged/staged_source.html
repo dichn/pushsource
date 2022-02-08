@@ -4,14 +4,14 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pushsource._impl.backend.staged.staged_source &#8212; pushsource  documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
-    <script src="../../../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -37,8 +37,6 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 
-<span class="kn">from</span> <span class="nn">concurrent</span> <span class="kn">import</span> <span class="n">futures</span>
-
 <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -48,13 +46,12 @@
 <span class="kn">from</span> <span class="nn">more_executors</span> <span class="kn">import</span> <span class="n">Executors</span>
 
 <span class="kn">from</span> <span class="nn">...source</span> <span class="kn">import</span> <span class="n">Source</span>
-<span class="kn">from</span> <span class="nn">...helpers</span> <span class="kn">import</span> <span class="n">list_argument</span>
+<span class="kn">from</span> <span class="nn">...helpers</span> <span class="kn">import</span> <span class="n">list_argument</span><span class="p">,</span> <span class="n">as_completed_with_timeout_reset</span>
 
 <span class="kn">from</span> <span class="nn">.staged_utils</span> <span class="kn">import</span> <span class="n">StagingMetadata</span><span class="p">,</span> <span class="n">StagingLeafDir</span>
 <span class="kn">from</span> <span class="nn">.staged_ami</span> <span class="kn">import</span> <span class="n">StagedAmiMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_files</span> <span class="kn">import</span> <span class="n">StagedFilesMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_errata</span> <span class="kn">import</span> <span class="n">StagedErrataMixin</span>
-<span class="kn">from</span> <span class="nn">.staged_channel_dumps</span> <span class="kn">import</span> <span class="n">StagedChannelDumpsMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_compsxml</span> <span class="kn">import</span> <span class="n">StagedCompsXmlMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_modulemd</span> <span class="kn">import</span> <span class="n">StagedModuleMdMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_productid</span> <span class="kn">import</span> <span class="n">StagedProductIdMixin</span>
@@ -71,7 +68,6 @@
     <span class="n">StagedAmiMixin</span><span class="p">,</span>
     <span class="n">StagedFilesMixin</span><span class="p">,</span>
     <span class="n">StagedErrataMixin</span><span class="p">,</span>
-    <span class="n">StagedChannelDumpsMixin</span><span class="p">,</span>
     <span class="n">StagedCompsXmlMixin</span><span class="p">,</span>
     <span class="n">StagedModuleMdMixin</span><span class="p">,</span>
     <span class="n">StagedProductIdMixin</span><span class="p">,</span>
@@ -85,7 +81,7 @@
     <span class="c1"># types; separate files are expected to register themselves here.</span>
     <span class="n">_FILE_TYPES</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">):</span>
+<div class="viewcode-block" id="StagedSource.__init__"><a class="viewcode-back" href="../../../../../sources/staged.html#pushsource.StagedSource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a new source.</span>
 
 <span class="sd">        Parameters:</span>
@@ -110,9 +106,17 @@
 
         <span class="c1"># Note: this executor does not have a retry.</span>
         <span class="c1"># NFS already does a lot of its own retries.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="n">Executors</span><span class="o">.</span><span class="n">thread_pool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">threads</span><span class="p">)</span><span class="o">.</span><span class="n">with_timeout</span><span class="p">(</span>
-            <span class="n">timeout</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Executors</span><span class="o">.</span><span class="n">thread_pool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pushsource-staged&quot;</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="n">threads</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_cancel_on_shutdown</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Possible improvement would be to handle the separate dirs concurrently.</span>
@@ -154,7 +158,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FILE_TYPES</span><span class="p">[</span><span class="n">leafdir</span><span class="o">.</span><span class="n">file_type</span><span class="p">](</span><span class="n">leafdir</span><span class="o">=</span><span class="n">leafdir</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_push_items_for_topdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topdir</span><span class="p">):</span>
-        <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Checking files in: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">topdir</span><span class="p">)</span>
+        <span class="n">LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking files in: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">topdir</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_metadata</span><span class="p">(</span><span class="n">topdir</span><span class="p">)</span>
 
@@ -191,13 +195,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">process_dir</span><span class="p">,</span> <span class="n">leafdir</span><span class="p">)</span> <span class="k">for</span> <span class="n">leafdir</span> <span class="ow">in</span> <span class="n">all_leaf_dirs</span>
         <span class="p">]</span>
 
-        <span class="n">completed_fs</span> <span class="o">=</span> <span class="n">futures</span><span class="o">.</span><span class="n">as_completed</span><span class="p">(</span><span class="n">pushitems_fs</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">)</span>
+        <span class="n">completed_fs</span> <span class="o">=</span> <span class="n">as_completed_with_timeout_reset</span><span class="p">(</span>
+            <span class="n">pushitems_fs</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">completed_fs</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">pushitem</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">result</span><span class="p">():</span>
                 <span class="k">yield</span> <span class="n">pushitem</span></div>
 
 
-<span class="n">Source</span><span class="o">.</span><span class="n">register_backend</span><span class="p">(</span><span class="s2">&quot;staged&quot;</span><span class="p">,</span> <span class="n">StagedSource</span><span class="p">)</span>
+<span class="n">Source</span><span class="o">.</span><span class="n">_register_backend_builtin</span><span class="p">(</span><span class="s2">&quot;staged&quot;</span><span class="p">,</span> <span class="n">StagedSource</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -220,22 +226,23 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../userguide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/base.html">Source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/staged.html">Source: staged</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/koji.html">Source: koji</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sources/registry.html">Source: registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/errata.html">Source: errata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/base.html">Push items</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/files.html">Push items: file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/rpm.html">Push items: RPM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/modulemd.html">Push items: modulemd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/errata.html">Push items: errata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model/containers.html">Push items: containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/ami.html">Push items: AMI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/productid.html">Push items: productid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/comps.html">Push items: comps.xml</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../model/channeldumps.html">Push items: channel dump</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../schema/staged.html">Schema: staged</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../schema/errata.html">Schema: errata</a></li>
 </ul>
@@ -264,7 +271,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -286,7 +293,7 @@
       &copy;2020, Red Hat.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
