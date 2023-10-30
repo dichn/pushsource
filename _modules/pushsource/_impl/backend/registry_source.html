@@ -1,17 +1,15 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pushsource._impl.backend.registry_source &#8212; pushsource  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=1fc5d657" />
+    <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -60,11 +58,15 @@
 <span class="n">IMAGE_URI_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;https://([^:@]*):(.+)(([^:]:)+)*&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RegistrySource"><a class="viewcode-back" href="../../../../sources/registry.html#pushsource.RegistrySource">[docs]</a><span class="k">class</span> <span class="nc">RegistrySource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Uses a container image registry as a source of push items.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RegistrySource">
+<a class="viewcode-back" href="../../../../sources/registry.html#pushsource.RegistrySource">[docs]</a>
+<span class="k">class</span> <span class="nc">RegistrySource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uses a container image registry as a source of push items.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="RegistrySource.__init__"><a class="viewcode-back" href="../../../../sources/registry.html#pushsource.RegistrySource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest_signing_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a new source.</span>
+<div class="viewcode-block" id="RegistrySource.__init__">
+<a class="viewcode-back" href="../../../../sources/registry.html#pushsource.RegistrySource.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dest_signing_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new source.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            image (str, list[str])</span>
@@ -89,6 +91,10 @@
 <span class="sd">                argument can affect the number of generated push items. For example,</span>
 <span class="sd">                providing two keys would produce double the amount of push items as providing</span>
 <span class="sd">                a single key.</span>
+
+<span class="sd">            product_name (str)</span>
+<span class="sd">                If provided, this value will be used to populate</span>
+<span class="sd">                :meth:`~pushsource.ContainerImagePushItem.product_name` on generated push items.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_images</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;https://</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_argument</span><span class="p">(</span><span class="n">image</span><span class="p">)]</span>
         <span class="k">if</span> <span class="n">dest</span><span class="p">:</span>
@@ -97,7 +103,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_repos</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_signing_keys</span> <span class="o">=</span> <span class="n">list_argument</span><span class="p">(</span><span class="n">dest_signing_key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_inspected</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_product_name</span> <span class="o">=</span> <span class="n">product_name</span></div>
+
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
@@ -141,6 +149,10 @@
                         <span class="n">manifest_types</span><span class="o">=</span><span class="p">[</span><span class="n">mtype</span><span class="p">],</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span><span class="p">[</span><span class="n">source_uri</span><span class="p">][</span><span class="n">mtype</span><span class="p">]</span> <span class="o">=</span> <span class="n">manifest_details</span>
+                <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RetryError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;too many 404 error responses&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="k">raise</span> <span class="n">e</span>
                 <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
                         <span class="k">continue</span>
@@ -171,10 +183,8 @@
             <span class="p">],</span>
             <span class="n">media_types</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">manifest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="n">MEDIATYPE_SCHEMA2_V1</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">manifest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span><span class="p">[</span><span class="n">source_uri</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                    <span class="p">]</span>
+                    <span class="n">manifest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="n">MEDIATYPE_SCHEMA2_V1</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">manifest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span><span class="p">[</span><span class="n">source_uri</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
                 <span class="p">)</span>
             <span class="p">),</span>
             <span class="n">tag_specs</span><span class="o">=</span><span class="p">[</span>
@@ -184,10 +194,8 @@
                     <span class="n">tag</span><span class="o">=</span><span class="n">src_tag</span><span class="p">,</span>
                     <span class="n">media_types</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span>
                         <span class="nb">set</span><span class="p">(</span>
-                            <span class="p">[</span>
-                                <span class="n">manifest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="n">MEDIATYPE_SCHEMA2_V1</span><span class="p">)</span>
-                                <span class="k">for</span> <span class="n">manifest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span><span class="p">[</span><span class="n">source_uri</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                            <span class="p">]</span>
+                            <span class="n">manifest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span> <span class="n">MEDIATYPE_SCHEMA2_V1</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">manifest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifests</span><span class="p">[</span><span class="n">source_uri</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
                         <span class="p">)</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
@@ -208,6 +216,7 @@
             <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
             <span class="n">arch</span><span class="o">=</span><span class="n">arch</span><span class="p">,</span>
             <span class="n">pull_info</span><span class="o">=</span><span class="n">pull_info</span><span class="p">,</span>
+            <span class="n">product_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_product_name</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -216,7 +225,8 @@
                 <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_push_item_from_registry_uri</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span></div>
 
 
-<span class="n">Source</span><span class="o">.</span><span class="n">_register_backend_builtin</span><span class="p">(</span><span class="s2">&quot;registry&quot;</span><span class="p">,</span> <span class="n">RegistrySource</span><span class="p">)</span>
+
+<span class="n">Source</span><span class="o">.</span><span class="n">register_backend</span><span class="p">(</span><span class="s2">&quot;registry&quot;</span><span class="p">,</span> <span class="n">RegistrySource</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -247,13 +257,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../sources/koji.html">Source: koji</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../sources/registry.html">Source: registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../sources/errata.html">Source: errata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sources/pub.html">Source: pub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/base.html">Push items</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/files.html">Push items: file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model/cgw.html">Push items: cgw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model/directory.html">Push items: directory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/rpm.html">Push items: RPM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/modulemd.html">Push items: modulemd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/errata.html">Push items: errata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/containers.html">Push items: containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/ami.html">Push items: AMI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model/azure.html">Push items: VHD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model/vmi.html">Push items: VMI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/productid.html">Push items: productid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../model/comps.html">Push items: comps.xml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../schema/staged.html">Schema: staged</a></li>
@@ -289,7 +304,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -306,8 +321,8 @@
       &copy;2020, Red Hat.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
 

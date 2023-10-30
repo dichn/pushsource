@@ -1,17 +1,15 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pushsource._impl.backend.staged.staged_source &#8212; pushsource  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../../_static/alabaster.css" />
-    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
-    <script src="../../../../../_static/jquery.js"></script>
-    <script src="../../../../../_static/underscore.js"></script>
-    <script src="../../../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/alabaster.css?v=1fc5d657" />
+    <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -31,21 +29,20 @@
           <div class="body" role="main">
             
   <h1>Source code for pushsource._impl.backend.staged.staged_source</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">scandir</span>
 
 <span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">pushsource._impl.compat</span> <span class="kn">import</span> <span class="n">scandir</span>
-
 <span class="kn">from</span> <span class="nn">pushcollector</span> <span class="kn">import</span> <span class="n">Collector</span>
 <span class="kn">from</span> <span class="nn">more_executors</span> <span class="kn">import</span> <span class="n">Executors</span>
 
 <span class="kn">from</span> <span class="nn">...source</span> <span class="kn">import</span> <span class="n">Source</span>
+<span class="kn">from</span> <span class="nn">...model</span> <span class="kn">import</span> <span class="n">DirectoryPushItem</span>
 <span class="kn">from</span> <span class="nn">...helpers</span> <span class="kn">import</span> <span class="n">list_argument</span><span class="p">,</span> <span class="n">as_completed_with_timeout_reset</span>
 
 <span class="kn">from</span> <span class="nn">.staged_utils</span> <span class="kn">import</span> <span class="n">StagingMetadata</span><span class="p">,</span> <span class="n">StagingLeafDir</span>
@@ -57,13 +54,16 @@
 <span class="kn">from</span> <span class="nn">.staged_productid</span> <span class="kn">import</span> <span class="n">StagedProductIdMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_rpm</span> <span class="kn">import</span> <span class="n">StagedRpmMixin</span>
 <span class="kn">from</span> <span class="nn">.staged_unsupported</span> <span class="kn">import</span> <span class="n">StagedUnsupportedMixin</span>
+<span class="kn">from</span> <span class="nn">.staged_cgw</span> <span class="kn">import</span> <span class="n">StagedCGWMixin</span>
 
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;pushsource&quot;</span><span class="p">)</span>
 <span class="n">METADATA_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;staged.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;staged.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;staged.json&quot;</span><span class="p">,</span> <span class="s2">&quot;pub-mapfile.json&quot;</span><span class="p">]</span>
 <span class="n">CACHE_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="StagedSource"><a class="viewcode-back" href="../../../../../sources/staged.html#pushsource.StagedSource">[docs]</a><span class="k">class</span> <span class="nc">StagedSource</span><span class="p">(</span>
+<div class="viewcode-block" id="StagedSource">
+<a class="viewcode-back" href="../../../../../sources/staged.html#pushsource.StagedSource">[docs]</a>
+<span class="k">class</span> <span class="nc">StagedSource</span><span class="p">(</span>
     <span class="n">Source</span><span class="p">,</span>
     <span class="n">StagedAmiMixin</span><span class="p">,</span>
     <span class="n">StagedFilesMixin</span><span class="p">,</span>
@@ -73,16 +73,19 @@
     <span class="n">StagedProductIdMixin</span><span class="p">,</span>
     <span class="n">StagedRpmMixin</span><span class="p">,</span>
     <span class="n">StagedUnsupportedMixin</span><span class="p">,</span>
+    <span class="n">StagedCGWMixin</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Uses a directory with a predefined layout (a &quot;staging directory&quot;) as</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uses a directory with a predefined layout (a &quot;staging directory&quot;) as</span>
 <span class="sd">    the source of push items.&quot;&quot;&quot;</span>
 
     <span class="c1"># To keep code maintainable, this class doesn&#39;t directly support any file</span>
     <span class="c1"># types; separate files are expected to register themselves here.</span>
     <span class="n">_FILE_TYPES</span> <span class="o">=</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="StagedSource.__init__"><a class="viewcode-back" href="../../../../../sources/staged.html#pushsource.StagedSource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a new source.</span>
+<div class="viewcode-block" id="StagedSource.__init__">
+<a class="viewcode-back" href="../../../../../sources/staged.html#pushsource.StagedSource.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new source.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            url (list[str])</span>
@@ -111,6 +114,7 @@
             <span class="o">.</span><span class="n">with_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
             <span class="o">.</span><span class="n">with_cancel_on_shutdown</span><span class="p">()</span>
         <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
@@ -155,6 +159,12 @@
         <span class="n">LOG</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Scanning </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">leafdir</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">leafdir</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">leafdir</span><span class="o">.</span><span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;RAW&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">DirectoryPushItem</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">leafdir</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="n">leafdir</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="p">[</span><span class="n">leafdir</span><span class="o">.</span><span class="n">dest</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FILE_TYPES</span><span class="p">[</span><span class="n">leafdir</span><span class="o">.</span><span class="n">file_type</span><span class="p">](</span><span class="n">leafdir</span><span class="o">=</span><span class="n">leafdir</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_push_items_for_topdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topdir</span><span class="p">):</span>
@@ -179,7 +189,7 @@
         <span class="c1"># All directories which may contain files to be processed</span>
         <span class="n">all_leaf_dirs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">destdir</span> <span class="ow">in</span> <span class="n">destdirs</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">file_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FILE_TYPES</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">file_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;RAW&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FILE_TYPES</span><span class="p">):</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">file_type</span><span class="p">)</span>
                 <span class="n">all_leaf_dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">StagingLeafDir</span><span class="p">(</span>
@@ -203,7 +213,8 @@
                 <span class="k">yield</span> <span class="n">pushitem</span></div>
 
 
-<span class="n">Source</span><span class="o">.</span><span class="n">_register_backend_builtin</span><span class="p">(</span><span class="s2">&quot;staged&quot;</span><span class="p">,</span> <span class="n">StagedSource</span><span class="p">)</span>
+
+<span class="n">Source</span><span class="o">.</span><span class="n">register_backend</span><span class="p">(</span><span class="s2">&quot;staged&quot;</span><span class="p">,</span> <span class="n">StagedSource</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -234,13 +245,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/koji.html">Source: koji</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/registry.html">Source: registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../sources/errata.html">Source: errata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sources/pub.html">Source: pub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/base.html">Push items</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/files.html">Push items: file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model/cgw.html">Push items: cgw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model/directory.html">Push items: directory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/rpm.html">Push items: RPM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/modulemd.html">Push items: modulemd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/errata.html">Push items: errata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/containers.html">Push items: containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/ami.html">Push items: AMI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model/azure.html">Push items: VHD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model/vmi.html">Push items: VMI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/productid.html">Push items: productid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../model/comps.html">Push items: comps.xml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../schema/staged.html">Schema: staged</a></li>
@@ -276,7 +292,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -293,8 +309,8 @@
       &copy;2020, Red Hat.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
 

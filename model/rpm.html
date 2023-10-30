@@ -1,22 +1,20 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Push items: RPM &#8212; pushsource  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=1fc5d657" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Push items: modulemd" href="modulemd.html" />
-    <link rel="prev" title="Push items: file" href="files.html" />
+    <link rel="prev" title="Push items: directory" href="directory.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -34,10 +32,10 @@
           <div class="body" role="main">
             
   <section id="push-items-rpm">
-<h1>Push items: RPM<a class="headerlink" href="#push-items-rpm" title="Permalink to this headline">¶</a></h1>
+<h1>Push items: RPM<a class="headerlink" href="#push-items-rpm" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pushsource.RpmPushItem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pushsource.</span></span><span class="sig-name descname"><span class="pre">RpmPushItem</span></span><a class="reference internal" href="../_modules/pushsource/_impl/model/rpm.html#RpmPushItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pushsource.RpmPushItem" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pushsource.</span></span><span class="sig-name descname"><span class="pre">RpmPushItem</span></span><a class="reference internal" href="../_modules/pushsource/_impl/model/rpm.html#RpmPushItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pushsource.RpmPushItem" title="Link to this definition">¶</a></dt>
 <dd><p>A <a class="reference internal" href="base.html#pushsource.PushItem" title="pushsource.PushItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">PushItem</span></code></a> representing a single RPM.</p>
 <p><strong>Attributes:</strong></p>
 <ul class="simple">
@@ -55,7 +53,7 @@
 </ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pushsource.RpmPushItem.module_build">
-<span class="sig-name descname"><span class="pre">module_build</span></span><a class="headerlink" href="#pushsource.RpmPushItem.module_build" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">module_build</span></span><a class="headerlink" href="#pushsource.RpmPushItem.module_build" title="Link to this definition">¶</a></dt>
 <dd><p>NVR for the koji module build through which this push item was located, if any.</p>
 <p>For a modular RPM push item, there may be two koji builds in play:</p>
 <dl>
@@ -73,8 +71,8 @@ is a valid build for <code class="docutils literal notranslate"><span class="pre
 be considered contextual information on how any given RPM was located. The same RPM
 may have different values of <code class="docutils literal notranslate"><span class="pre">module_build</span></code> when loaded from different contexts.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -112,13 +110,21 @@ may have different values of <code class="docutils literal notranslate"><span cl
 <li class="toctree-l1"><a class="reference internal" href="../sources/koji.html">Source: koji</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../sources/registry.html">Source: registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../sources/errata.html">Source: errata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pub.html">Source: pub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">Push items</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Push items: file</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Push items: RPM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cgw.html">Push items: cgw</a></li>
+<li class="toctree-l1"><a class="reference internal" href="directory.html">Push items: directory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Push items: RPM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pushsource.RpmPushItem"><code class="docutils literal notranslate"><span class="pre">RpmPushItem</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="modulemd.html">Push items: modulemd</a></li>
 <li class="toctree-l1"><a class="reference internal" href="errata.html">Push items: errata</a></li>
 <li class="toctree-l1"><a class="reference internal" href="containers.html">Push items: containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ami.html">Push items: AMI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="azure.html">Push items: VHD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vmi.html">Push items: VMI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="productid.html">Push items: productid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="comps.html">Push items: comps.xml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../schema/staged.html">Schema: staged</a></li>
@@ -140,7 +146,7 @@ may have different values of <code class="docutils literal notranslate"><span cl
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="files.html" title="previous chapter">Push items: file</a></li>
+      <li>Previous: <a href="directory.html" title="previous chapter">Push items: directory</a></li>
       <li>Next: <a href="modulemd.html" title="next chapter">Push items: modulemd</a></li>
   </ul></li>
 </ul>
@@ -154,7 +160,7 @@ may have different values of <code class="docutils literal notranslate"><span cl
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -171,8 +177,8 @@ may have different values of <code class="docutils literal notranslate"><span cl
       &copy;2020, Red Hat.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="../_sources/model/rpm.rst.txt"
