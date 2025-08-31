@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>pushsource &#8212; pushsource  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=1fc5d657" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=32913b9a" />
     <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -17,8 +17,9 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -125,6 +126,7 @@
 <li class="toctree-l2"><a class="reference internal" href="model/ami.html#pushsource.AmiRelease"><code class="docutils literal notranslate"><span class="pre">AmiRelease</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/ami.html#pushsource.AmiBillingCodes"><code class="docutils literal notranslate"><span class="pre">AmiBillingCodes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/ami.html#pushsource.AmiSecurityGroup"><code class="docutils literal notranslate"><span class="pre">AmiSecurityGroup</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model/ami.html#pushsource.AmiAccessEndpointUrl"><code class="docutils literal notranslate"><span class="pre">AmiAccessEndpointUrl</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="model/azure.html">Push items: VHD</a><ul>
@@ -134,6 +136,7 @@
 <li class="toctree-l1"><a class="reference internal" href="model/vmi.html">Push items: VMI</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="model/vmi.html#pushsource.VMIPushItem"><code class="docutils literal notranslate"><span class="pre">VMIPushItem</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/vmi.html#pushsource.VMIRelease"><code class="docutils literal notranslate"><span class="pre">VMIRelease</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="model/vmi.html#pushsource.VMICloudInfo"><code class="docutils literal notranslate"><span class="pre">VMICloudInfo</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/vmi.html#pushsource.BootMode"><code class="docutils literal notranslate"><span class="pre">BootMode</span></code></a></li>
 </ul>
 </li>
@@ -158,8 +161,8 @@
 <p>In your python code, obtain a <a class="reference internal" href="sources/base.html#pushsource.Source" title="pushsource.Source"><code class="xref py py-class docutils literal notranslate"><span class="pre">Source</span></code></a> instance,
 iterate over the source to obtain push items, and perform desired operations
 according to their type and attributes:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pushsource</span> <span class="kn">import</span> <span class="n">Source</span><span class="p">,</span> <span class="n">RpmPushItem</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pushsource</span><span class="w"> </span><span class="kn">import</span> <span class="n">Source</span><span class="p">,</span> <span class="n">RpmPushItem</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="k">with</span> <span class="n">Source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;koji:https://koji.fedoraproject.org/kojihub?rpm=rpm1,rpm2,...&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
@@ -180,7 +183,7 @@ according to their type and attributes:</p>
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="#">pushsource</a></h1>
 
@@ -241,7 +244,7 @@ according to their type and attributes:</p>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -249,7 +252,7 @@ according to their type and attributes:</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -264,11 +267,11 @@ according to their type and attributes:</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Red Hat.
+      &#169;2020, Red Hat.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="_sources/index.rst.txt"
@@ -277,7 +280,7 @@ according to their type and attributes:</p>
 
     
     <a href="https://github.com/release-engineering/pushsource" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     
 
